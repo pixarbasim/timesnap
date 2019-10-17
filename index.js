@@ -221,12 +221,20 @@ module.exports = function (config) {
 
         var startCaptureTime = new Date().getTime();
         var markerIndex = 0;
+        var nextFrameIndex = -1;
         return promiseLoop(function () {
           return markerIndex < markers.length;
         }, function () {
           var e = markers[markerIndex];
           var p;
           markerIndex++;
+
+          while(e.frameCount < nextFrameIndex ){
+            e = markers[markerIndex];
+            markerIndex++;
+            continue;
+          }
+
           if (e.type === 'Capture') {
             p = timeHandler.goToTimeAndAnimateForCapture(browserFrames, e.time);
             // because this section is run often and there is a small performance
@@ -236,7 +244,11 @@ module.exports = function (config) {
               p = p.then(function () {
                 log('Preparing page for screenshot...');
                 return config.preparePageForScreenshot(page, e.frameCount, framesToCapture);
-              }).then(function () {
+              }).then(function (frameIndex) {
+                if(frameIndex) {
+                  // skip frames till this frame index
+                  nextFrameIndex = frameIndex;
+                }
                 log('Page prepared');
               });
             }
