@@ -272,6 +272,7 @@ module.exports = function (config) {
       return browser.close();
     }).catch(function (err) {
       log(err);
+      throw err;
     });
   });
 };
