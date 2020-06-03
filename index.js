@@ -149,7 +149,7 @@ module.exports = function (config) {
         return initializeMediaTimeHandler(page);
       }).then(function () {
         log('Going to ' + url + '...');
-        return page.goto(url, { waitUntil: 'networkidle0' });
+        return page.goto(url, { waitUntil: 'networkidle0', timeout: 0 });
       }).then(function () {
         log('Page loaded');
         if ('preparePage' in config) {
