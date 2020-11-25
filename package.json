@@ -1,5 +1,5 @@
 {
-  "name": "canvas-snap",
+  "name": "timesnap",
   "version": "0.1.2-prerelease",
   "description": "Take screenshots of web pages at smooth intervals",
   "repository": {
