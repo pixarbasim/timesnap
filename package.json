@@ -1,13 +1,13 @@
 {
-  "name": "timesnap",
+  "name": "canvas-snap",
   "version": "0.1.2-prerelease",
   "description": "Take screenshots of web pages at smooth intervals",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tungs/timesnap.git"
+    "url": "https://github.com/pixarbasim/timesnap.git"
   },
   "author": {
-    "name": "Steve Tung"
+    "name": "Basim Ahmad"
   },
   "engines": {
     "node": ">=6.4.0"
@@ -22,7 +22,7 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "commander": "^2.11.0",
-    "puppeteer": "^5.3.0",
+    "puppeteer": "^1.7",
     "sprintf-js": "1.1.1"
   },
   "devDependencies": {
