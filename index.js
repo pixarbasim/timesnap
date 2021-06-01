@@ -35,7 +35,7 @@ const path = require('path');
 const defaultDuration = 5;
 const defaultFPS = 60;
 const { overwriteRandom } = require('./lib/overwrite-random');
-const { promiseLoop, getBrowserFrames } = require('./lib/utils');
+const { promiseLoop, getBrowserFrames, sleep } = require('./lib/utils');
 const initializePageUtils = require('./lib/page-utils');
 const initializeMediaTimeHandler = require('./lib/media-time-handler');
 
@@ -97,6 +97,23 @@ module.exports = function (config) {
     }
   };
 
+const gotoPageWithRetries = async function (page, url, retryCount = 10) {
+  if (retryCount > 0) {
+    const result = await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 }).catch(e => e);
+
+    if (result instanceof Error && result.toString().includes(`ERR_NETWORK_CHANGED`)) {
+      if(retryCount > 1){
+        log('Failed to load page with error: ' + result.message);
+        log('Going to retry');
+        await sleep(250); //Sleep for 250ms
+        return await gotoPageWithRetries(page, url, retryCount - 1);
+      }
+    }        
+    return result;
+  }
+};
+
+
   const launchOptions = {
     dumpio: !config.quiet && !config.logToStdErr,
     headless: (config.headless !== undefined ? config.headless : true),
@@ -149,7 +166,7 @@ module.exports = function (config) {
         return initializeMediaTimeHandler(page);
       }).then(function () {
         log('Going to ' + url + '...');
-        return page.goto(url, { waitUntil: 'networkidle0', timeout: 0 });
+        return gotoPageWithRetries(page, url);
       }).then(function () {
         log('Page loaded');
         if ('preparePage' in config) {
