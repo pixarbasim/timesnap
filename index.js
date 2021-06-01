@@ -99,16 +99,27 @@ module.exports = function (config) {
 
 const gotoPageWithRetries = async function (page, url, retryCount = 10) {
   if (retryCount > 0) {
-    const result = await page.goto(url, { waitUntil: 'networkidle0', timeout: 0 }).catch(e => e);
 
-    if (result instanceof Error && result.toString().includes(`ERR_NETWORK_CHANGED`)) {
-      if(retryCount > 1){
+    const onRetry = async (count) => {
+      log('Going to retry');
+      await sleep(250); //Sleep for 250ms
+      return await gotoPageWithRetries(page, url, count);
+    }
+
+    try {
+      const result = await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 }).catch(e => e);
+      if (result instanceof Error) {
+        //Retry in case an error is thrown on the puppeteer navigation
         log('Failed to load page with error: ' + result.message);
-        log('Going to retry');
-        await sleep(250); //Sleep for 250ms
-        return await gotoPageWithRetries(page, url, retryCount - 1);
-      }
-    }        
+        if(retryCount > 1){
+          return onRetry(result, retryCount - 1);
+        }
+      }        
+    } catch(err) {
+      log('Failed to load page with error: ' + err.message);
+      return onRetry(retryCount -1);
+    }
+
     return result;
   }
 };
